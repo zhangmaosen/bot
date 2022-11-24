@@ -1,0 +1,27 @@
+{
+    "operationName": "ListBrowseDashboards",
+    "variables": {
+        "include_favs_last_24h": false,
+        "include_favs_last_7d": false,
+        "include_favs_last_30d": false,
+        "include_favs_all_time": true,
+        "filter_name": {},
+        "filter_tags": {},
+        "filter_custom": [],
+        "order": [
+            {
+                "trending_scores": {
+                    "score_4h": "desc_nulls_last"
+                }
+            },
+            {
+                "dashboard_favorite_count_all": {
+                    "favorite_count": "desc_nulls_last"
+                }
+            }
+        ],
+        "limit": 20,
+        "offset": 0
+    },
+    "query": "query ListBrowseDashboards($filter_name: String_comparison_exp, $filter_tags: jsonb_comparison_exp, $filter_custom: [dashboards_bool_exp!], $order: [dashboards_order_by!], $limit: Int!, $offset: Int!, $include_favs_last_24h: Boolean! = false, $include_favs_last_7d: Boolean! = false, $include_favs_last_30d: Boolean! = false, $include_favs_all_time: Boolean! = false) {\n  dashboards(\n    where: {is_archived: {_eq: false}, name: $filter_name, tags: $filter_tags, _and: $filter_custom}\n    limit: $limit\n    offset: $offset\n    order_by: $order\n  ) {\n    ...DashboardItem\n    __typename\n  }\n  dashboards_aggregate(\n    where: {is_archived: {_eq: false}, name: $filter_name, tags: $filter_tags, _and: $filter_custom}\n  ) {\n    aggregate {\n      count\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment DashboardItem on dashboards {\n  id\n  name\n  slug\n  created_at\n  tags\n  user {\n    name\n    profile_image_url\n    __typename\n  }\n  team {\n    handle\n    profile_image_url\n    __typename\n  }\n  is_private\n  dashboard_favorite_count_all @include(if: $include_favs_all_time) {\n    favorite_count\n    __typename\n  }\n  dashboard_favorite_count_last_24h @include(if: $include_favs_last_24h) {\n    favorite_count\n    __typename\n  }\n  dashboard_favorite_count_last_7d @include(if: $include_favs_last_7d) {\n    favorite_count\n    __typename\n  }\n  dashboard_favorite_count_last_30d @include(if: $include_favs_last_30d) {\n    favorite_count\n    __typename\n  }\n  trending_scores {\n    score_1h\n    score_4h\n    score_24h\n    updated_at\n    __typename\n  }\n  __typename\n}\n"
+}

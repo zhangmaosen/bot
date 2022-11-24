@@ -1,0 +1,80 @@
+import scrapy
+import json
+import requests
+
+class QuerySpider(scrapy.Spider):
+    name = 'query'
+    allowed_domains = ['dune.com']
+
+    f = open('/Users/maosen/Dev/dune/metabot/payloads/queryPayload.json')
+    pay_load = json.load(f)
+        
+    url = 'https://core-hsr.dune.com/v1/graphql'
+    headers = {"x-hasura-api-key" : ""};
+        
+
+    def start_requests(self):
+        seed_f = open("/Users/maosen/Dev/dune/metabot/seeds/queryLists.json", "r");
+        line = seed_f.readline();
+        
+        while line:
+            line = seed_f.readline();
+            
+            line = line.strip();
+            if line == ']':
+                break;
+            
+            q = json.loads(line.strip(','));
+            dbs = q["data"]["dashboards"];
+            for d in dbs:
+                for v in d["visualization_widgets"]:
+                    queryId = v["visualization"]["query_details"]["query_id"];
+                    self.pay_load["variables"]["id"] = queryId;
+                    yield scrapy.http.JsonRequest(url=self.url, method='POST', headers = self.headers , data = self.pay_load, callback=self.parse)
+            
+
+    def parse(self, response):
+        
+        yield json.loads(response.body);
+        # data = ((json.loads(response.body)))['data'];
+        
+        # queries = data['queries'];
+        # for q in queries:
+        #     yield {
+        #             'query_id': q['id'],
+        #             'query_name': q['name'],
+        #             'query_time' : q['created_at'],
+        #             'query_user' : q['user'],
+        #             'query_team' : q['team'],
+        #             'query_sql' : q['query'],
+        #             'query_forked_from' : q['forked_query']
+        #     }
+        
+        
+        # data = response.css('#__NEXT_DATA__::text').get()
+        # json_data = json.loads(data);
+        # cache_data = json_data['props']['pageProps']['listBrowseQueriesCacheData'];
+        # for c in cache_data:
+        #     queries = c['data']['queries'];
+        #     for q in queries:
+        #         yield {
+        #             'query_id': q['id'],
+        #             'query_name': q['name'],
+        #             'query_time' : q['created_at'],
+        #             'query_user' : q['user'],
+        #             'query_team' : q['team']
+        #         }
+        
+        # if_last_page = response.css('.pagination_pagination__sA__l .pagination_item__hNwwg:last-child a::attr(aria-current)').get();
+        # if if_last_page == 'false':
+        #     page = response.css('.pagination_pagination__sA__l .pagination_item__hNwwg a[aria-current=true]::text').get();
+        #     page = int(page) + 1;
+        #     next_url = self.base_url + str(page);
+        #     self.log(f'Get new page {next_url}');
+        #     yield scrapy.Request(next_url, callback=self.parse)
+        # else:
+        #     pass
+        # #print(response.css('#__NEXT_DATA__::text').get())
+        # #f.write(response.css('#__NEXT_DATA__::text').get())
+            
+       

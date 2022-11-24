@@ -1,0 +1,11 @@
+{
+    "operationName": "FindDashboard",
+    "variables": {
+        "session_filter": {
+            
+        },
+        "user": "lee",
+        "slug": "pooly-nft-by-0xphillan"
+    },
+    "query": "query FindDashboard($session_filter: Int_comparison_exp!, $user: String!, $slug: String!) {\n  dashboards(\n    where: {slug: {_eq: $slug}, _or: [{user: {name: {_eq: $user}}}, {team: {handle: {_eq: $user}}}]}\n  ) {\n    ...Dashboard\n    favorite_dashboards(where: {user_id: $session_filter}, limit: 1) {\n      created_at\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment Dashboard on dashboards {\n  id\n  name\n  slug\n  is_private\n  is_archived\n  created_at\n  updated_at\n  tags\n  user {\n    ...User\n    __typename\n  }\n  team {\n    ...Team\n    __typename\n  }\n  forked_dashboard {\n    slug\n    name\n    user {\n      name\n      __typename\n    }\n    team {\n      handle\n      __typename\n    }\n    __typename\n  }\n  text_widgets {\n    id\n    created_at\n    updated_at\n    text\n    options\n    __typename\n  }\n  visualization_widgets {\n    id\n    created_at\n    updated_at\n    options\n    visualization {\n      ...Visualization\n      __typename\n    }\n    __typename\n  }\n  param_widgets {\n    id\n    key\n    visualization_widget_id\n    query_id\n    dashboard_id\n    options\n    created_at\n    updated_at\n    __typename\n  }\n  dashboard_favorite_count_all {\n    favorite_count\n    __typename\n  }\n  trending_scores {\n    score_1h\n    score_4h\n    score_24h\n    updated_at\n    __typename\n  }\n  __typename\n}\n\nfragment User on users {\n  id\n  name\n  profile_image_url\n  __typename\n}\n\nfragment Team on teams {\n  id\n  name\n  handle\n  profile_image_url\n  __typename\n}\n\nfragment Visualization on visualizations {\n  id\n  type\n  name\n  options\n  created_at\n  query_details {\n    query_id\n    name\n    description\n    show_watermark\n    parameters\n    user {\n      id\n      name\n      profile_image_url\n      __typename\n    }\n    team {\n      id\n      name\n      handle\n      profile_image_url\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n"
+}
